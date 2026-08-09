@@ -108,17 +108,41 @@
         text-align: center;
       }
 
-      #bitsy-container {
+      /* Контейнер для игры и кнопки — одинаковая ширина */
+      #bitsy-with-btn-wrapper {
         margin-top: 2rem;
-        display: none;
         width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
       }
+
       #bitsy-game {
         width: 100%;
         height: 480px;
         border: none;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        display: block;
+      }
+
+      /* Кнопка «Подтвердить продолжение» — стиль как у остальных, ширина как у игры */
+      .confirm-btn {
+        width: 100%;
+        max-width: 600px;
+        background-color: #ffffff;
+        border: 2px solid #0a1f45;
+        color: #0a1f45;
+        padding: 14px 20px;
+        font-family: 'DOSFont', monospace;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      .confirm-btn:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
       }
     </style>
   </head>
@@ -168,11 +192,11 @@
         <p class="post-choice-line">Хорошо, я подожду. Расскажи подробнее, что именно мне нужно сделать с диском?</p>
       </div>
 
-      <!-- Ветка «Да, конечно»: текст + мини-игра -->
+      <!-- Ветка «Да, конечно»: текст + мини-игра + кнопка подтверждения -->
       <div id="yes-branch" class="post-choice-block" style="display:none;">
         <p class="post-choice-line">Тогда первая головоломка начнётся прямо сейчас.</p>
 
-        <div id="bitsy-container">
+        <div id="bitsy-with-btn-wrapper">
           <iframe 
             id="bitsy-game"
             src="bitsy-puzzle1/game1.html" 
@@ -180,6 +204,10 @@
             allowfullscreen
             allow="autoplay; fullscreen">
           </iframe>
+
+          <div style="margin-top:1.5rem; text-align:center;">
+            <button id="btn-confirm" class="confirm-btn">Подтвердить продолжение</button>
+          </div>
         </div>
       </div>
     </div>
@@ -301,12 +329,12 @@
               // Для ветки «Да» сразу показываем текст и открываем игру
               showYesLine();
 
-              const bitsyContainer = document.getElementById('bitsy-container');
-              if (bitsyContainer) {
-                bitsyContainer.style.display = 'block';
+              const bitsyWrapper = document.getElementById('bitsy-with-btn-wrapper');
+              if (bitsyWrapper) {
+                bitsyWrapper.style.display = 'block';
                 // Плавно скроллим к игре
                 window.scrollTo({
-                  top: bitsyContainer.offsetTop,
+                  top: bitsyWrapper.offsetTop,
                   behavior: 'smooth'
                 });
               }
@@ -324,7 +352,6 @@
                 showNextNarrativeLine();
                 return;
               }
-              // Если дочитали до конца, ждём выбора кнопками
               return;
 
             case 'help':
@@ -332,7 +359,6 @@
                 showHelpLine();
                 return;
               }
-              // Когда дочитали все строки ветки «Помочь», ждём выбора кнопками
               return;
 
             case 'noHelp':
@@ -350,7 +376,6 @@
               return;
 
             case 'yes':
-              // В ветке «Да» после появления игры больше нет строк для показа
               return;
           }
         });
@@ -378,6 +403,21 @@
         if (document.getElementById('btn-wait')) {
           document.getElementById('btn-wait').addEventListener('click', () => {
             openBranch(waitBranch, 'wait');
+          });
+        }
+
+        // ГЛАВНОЕ: при нажатии «Подтвердить продолжение» исчезает только кнопка, игра остаётся
+        if (document.getElementById('btn-confirm')) {
+          document.getElementById('btn-confirm').addEventListener('click', () => {
+            const confirmBtn = document.getElementById('btn-confirm');
+            if (confirmBtn) {
+              confirmBtn.style.display = 'none'; // скрываем только кнопку
+            }
+
+            // Также скрываем кнопки второго выбора, если они ещё видны
+            if (secondChoiceButtons) {
+              secondChoiceButtons.style.display = 'none';
+            }
           });
         }
       });
