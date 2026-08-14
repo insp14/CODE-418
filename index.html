@@ -228,10 +228,9 @@
 
         let currentStage = 'intro';
         let currentTypingInterval = null;
-        
-        // Функция печатной машинки с возможностью пропуска анимации
-        function typeText(element, text, speed = 30) {
-          // Если идёт другая анимация — пропускаем её
+        let firstChoiceShown = false;
+
+        function typeText(element, text, speed = 30, onComplete) {
           if (currentTypingInterval) {
             currentTypingInterval.skip();
           }
@@ -257,6 +256,7 @@
               if (currentTypingInterval === controller) {
                 currentTypingInterval = null;
               }
+              if (onComplete) onComplete();
             }
           };
 
@@ -266,33 +266,35 @@
             if (currentTypingInterval === controller) {
               currentTypingInterval = null;
             }
+            if (onComplete) onComplete();
           }
 
           currentTypingInterval = controller;
           return controller;
         }
-
-        // Функции показа строк в разных ветках — теперь они автоматически пропускают предыдущую анимацию
         function showNextNarrativeLine() {
           if (narrativeIndex >= narrativeLines.length - 1) return;
           narrativeIndex++;
           const line = narrativeLines[narrativeIndex];
-          typeText(line, line.getAttribute('data-original-text') || line.textContent);
 
-          if (narrativeIndex === narrativeLines.length - 1 && firstChoiceButtons) {
-            firstChoiceButtons.classList.add('visible');
-          }
+          // Это последняя строка интро — после её печати покажем кнопки
+          const isLastLine = narrativeIndex === narrativeLines.length - 1;
+
+          typeText(line, line.getAttribute('data-original-text') || line.textContent, 30, () => {
+            if (isLastLine && firstChoiceButtons && !firstChoiceShown) {
+              firstChoiceButtons.classList.add('visible');
+              firstChoiceShown = true;
+            }
+          });
         }
 
         function showHelpLine() {
           if (!helpBranch || currentStage !== 'help') return;
-
           if (helpIndex < helpLines.length - 1) {
             helpIndex++;
             const line = helpLines[helpIndex];
             typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
-
           if (helpIndex === helpLines.length - 1 && secondChoiceButtons) {
             secondChoiceButtons.classList.add('visible');
           }
@@ -300,16 +302,15 @@
 
         function showNoHelpLine() {
           if (!noHelpBranch || currentStage !== 'noHelp') return;
-
           if (noHelpIndex < noHelpLines.length - 1) {
             noHelpIndex++;
             const line = noHelpLines[noHelpIndex];
             typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
         }
+
         function showWaitLine() {
           if (!waitBranch || currentStage !== 'wait') return;
-
           if (waitIndex < waitLines.length - 1) {
             waitIndex++;
             const line = waitLines[waitIndex];
@@ -319,15 +320,12 @@
 
         function showYesLine() {
           if (!yesBranch || currentStage !== 'yes') return;
-
           if (yesIndex < yesLines.length - 1) {
             yesIndex++;
             const line = yesLines[yesIndex];
             typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
         }
-
-        // Переключает на нужную ветку и сбрасывает индексы
         function openBranch(branchElement, branchType) {
           [noHelpBranch, helpBranch, waitBranch, yesBranch].forEach(b => {
             if (b) b.style.display = 'none';
@@ -368,6 +366,7 @@
               break;
           }
         }
+
         // Обработчики кнопок выбора
         const btnHelp = document.getElementById('btn-help');
         const btnNoHelp = document.getElementById('btn-no-help');
