@@ -57,17 +57,17 @@
         box-sizing: border-box;
       }
 
-      /* Строки текста */
-      .narrative-line, .post-choice-line {
-        opacity: 0;
-        transform: translateX(100%);
-        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        margin-bottom: 3rem;
+      /* Эффект печатной машинки */
+      .type-line {
+        white-space: pre-wrap; /* сохраняет переносы строк, если будут */
+        overflow: hidden;
+        border-right: 1px solid #0a1f45; /* курсор печатной машинки */
+        display: block;
         line-height: 1.4;
+        margin-bottom: 3rem;
       }
-      .narrative-line.visible, .post-choice-line.visible {
-        opacity: 1;
-        transform: translateX(0);
+      .type-line.finished {
+        border-right: none; /* убираем курсор, когда строка допечатана */
       }
 
       /* Кнопки выбора */
@@ -153,13 +153,13 @@
 
     <div class="scroll-narrative">
       <!-- Основной монолог незнакомца (строки 1–7) -->
-      <p class="narrative-line">Кто ты и что ты здесь забыл?</p>
-      <p class="narrative-line">Что ты хочешь найти, тут ничего нет?</p>
-      <p class="narrative-line">Ладно, на самом деле мне нужна твоя помощь.</p>
-      <p class="narrative-line">Мне не известно кто ты, но ты первый человек, который смог попасть ко мне в закрытую систему.</p>
-      <p class="narrative-line">Я являюсь специальной программой, разработанной под конкретные задачи. Во время прохождения обучения произошла ошибка.</p>
-      <p class="narrative-line">Процесс был приостановлен и вследствие невозможен, а я попал сюда без возможности выбраться.</p>
-      <p class="narrative-line">Если бы ты мне помог завершить обучение, я был бы очень благодарен.</p>
+      <p class="type-line">Кто ты и что ты здесь забыл?</p>
+      <p class="type-line">Что ты хочешь найти, тут ничего нет?</p>
+      <p class="type-line">Ладно, на самом деле мне нужна твоя помощь.</p>
+      <p class="type-line">Мне не известно кто ты, но ты первый человек, который смог попасть ко мне в закрытую систему.</p>
+      <p class="type-line">Я являюсь специальной программой, разработанной под конкретные задачи. Во время прохождения обучения произошла ошибка.</p>
+      <p class="type-line">Процесс был приостановлен и вследствие невозможен, а я попал сюда без возможности выбраться.</p>
+      <p class="type-line">Если бы ты мне помог завершить обучение, я был бы очень благодарен.</p>
 
       <!-- Первый выбор: Помочь / Не помогать -->
       <div class="choice-buttons" id="first-choice-buttons">
@@ -169,16 +169,16 @@
 
       <!-- Ветка «Не помогать» -->
       <div id="no-help-branch" class="post-choice-block" style="display:none;">
-        <p class="post-choice-line">Ты отказался. На секунду экран потемнел, а затем появилась сухая строка: “Отказ зафиксирован. Доступ к модулю закрыт.”</p>
+        <p class="type-line">Ты отказался. На секунду экран потемнел, а затем появилась сухая строка: “Отказ зафиксирован. Доступ к модулю закрыт.”</p>
       </div>
 
       <!-- Ветка «Помочь»: строки 1–5 этой ветки + второй выбор -->
       <div id="help-branch" class="post-choice-block" style="display:none;">
-        <p class="post-choice-line">Здорово, тогда план такой: далее тебе будет предложено пройти 3 головоломки.</p>
-        <p class="post-choice-line">Процесс и результат ты должен записать на специальный диск, данные которого ты должен перезаписать на меня.</p>
-        <p class="post-choice-line">После этого и после моей перезагрузки у меня появится доступ к внешней сети под названием «Инто», где хранится гигантское количество информации.</p>
-        <p class="post-choice-line">За счёт этого я смогу вернуться к своим обязанностям и выполнять запрограммированные задачи.</p>
-        <p class="post-choice-line">Ты готов?</p>
+        <p class="type-line">Здорово, тогда план такой: далее тебе будет предложено пройти 3 головоломки.</p>
+        <p class="type-line">Процесс и результат ты должен записать на специальный диск, данные которого ты должен перезаписать на меня.</p>
+        <p class="type-line">После этого и после моей перезагрузки у меня появится доступ к внешней сети под названием «Инто», где хранится гигантское количество информации.</p>
+        <p class="type-line">За счёт этого я смогу вернуться к своим обязанностям и выполнять запрограммированные задачи.</p>
+        <p class="type-line">Ты готов?</p>
 
         <!-- Второй выбор: Да, конечно / Нет, подожди -->
         <div class="choice-buttons" id="second-choice-buttons">
@@ -189,12 +189,12 @@
 
       <!-- Ветка «Нет, подожди» -->
       <div id="wait-branch" class="post-choice-block" style="display:none;">
-        <p class="post-choice-line">Хорошо, я подожду. Расскажи подробнее, что именно мне нужно сделать с диском?</p>
+        <p class="type-line">Хорошо, я подожду. Расскажи подробнее, что именно мне нужно сделать с диском?</p>
       </div>
 
       <!-- Ветка «Да, конечно»: текст + мини-игра + кнопка подтверждения -->
       <div id="yes-branch" class="post-choice-block" style="display:none;">
-        <p class="post-choice-line">Тогда первая головоломка начнётся прямо сейчас.</p>
+        <p class="type-line">Тогда первая головоломка начнётся прямо сейчас.</p>
 
         <div id="bitsy-with-btn-wrapper">
           <iframe 
@@ -216,7 +216,7 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        const narrativeLines = document.querySelectorAll('.narrative-line');
+        const narrativeLines = document.querySelectorAll('.type-line');
         const firstChoiceButtons = document.getElementById('first-choice-buttons');
         const secondChoiceButtons = document.getElementById('second-choice-buttons');
 
@@ -225,8 +225,8 @@
         const waitBranch = document.getElementById('wait-branch');
         const yesBranch = document.getElementById('yes-branch');
 
-        // Строки внутри веток
-        const getLines = (branch) => branch ? branch.querySelectorAll('.post-choice-line') : [];
+        // Получаем строки внутри веток
+        const getLines = (branch) => branch ? branch.querySelectorAll('.type-line') : [];
         const noHelpLines = getLines(noHelpBranch);
         const helpLines = getLines(helpBranch);
         const waitLines = getLines(waitBranch);
@@ -241,10 +241,27 @@
         // Состояние: 'intro' | 'help' | 'noHelp' | 'wait' | 'yes'
         let currentStage = 'intro';
 
+        // Печатает строку посимвольно
+        function typeText(element, text, speed = 30) {
+          element.textContent = '';
+          element.classList.remove('finished');
+          let i = 0;
+          const interval = setInterval(() => {
+            if (i < text.length) {
+              element.textContent += text.charAt(i);
+              i++;
+            } else {
+              clearInterval(interval);
+              element.classList.add('finished');
+            }
+          }, speed);
+        }
+
         function showNextNarrativeLine() {
           if (narrativeIndex >= narrativeLines.length - 1) return;
           narrativeIndex++;
-          narrativeLines[narrativeIndex].classList.add('visible');
+          const line = narrativeLines[narrativeIndex];
+          typeText(line, line.getAttribute('data-original-text') || line.textContent);
 
           // Кнопки первого выбора появляются только когда дочитан весь основной монолог
           if (narrativeIndex === narrativeLines.length - 1 && firstChoiceButtons) {
@@ -257,7 +274,8 @@
 
           if (helpIndex < helpLines.length - 1) {
             helpIndex++;
-            helpLines[helpIndex].classList.add('visible');
+            const line = helpLines[helpIndex];
+            typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
 
           // Кнопки второго выбора показываем только после последней строки ветки «Помочь»
@@ -271,7 +289,8 @@
 
           if (noHelpIndex < noHelpLines.length - 1) {
             noHelpIndex++;
-            noHelpLines[noHelpIndex].classList.add('visible');
+            const line = noHelpLines[noHelpIndex];
+            typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
         }
 
@@ -280,7 +299,8 @@
 
           if (waitIndex < waitLines.length - 1) {
             waitIndex++;
-            waitLines[waitIndex].classList.add('visible');
+            const line = waitLines[waitIndex];
+            typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
         }
 
@@ -289,7 +309,8 @@
 
           if (yesIndex < yesLines.length - 1) {
             yesIndex++;
-            yesLines[yesIndex].classList.add('visible');
+            const line = yesLines[yesIndex];
+            typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
         }
 
@@ -380,8 +401,17 @@
           }
         });
 
-        showNextNarrativeLine(); // сразу показываем первую строку
+        // Перед стартом сохраняем оригинальный текст, чтобы печатать его заново при необходимости
+        narrativeLines.forEach(el => {
+          el.setAttribute('data-original-text', el.textContent);
+          el.textContent = ''; // сразу очищаем, чтобы начать с печати
+        });
+        noHelpLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
+        helpLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
+        waitLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
+        yesLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
 
+        // Обработчики кнопок выбора
         if (document.getElementById('btn-help')) {
           document.getElementById('btn-help').addEventListener('click', () => {
             openBranch(helpBranch, 'help');
@@ -406,12 +436,12 @@
           });
         }
 
-        // ГЛАВНОЕ: при нажатии «Подтвердить продолжение» исчезает только кнопка, игра остаётся
+        // Кнопка «Подтвердить продолжение» — скрывает только кнопку, игра остаётся
         if (document.getElementById('btn-confirm')) {
           document.getElementById('btn-confirm').addEventListener('click', () => {
             const confirmBtn = document.getElementById('btn-confirm');
             if (confirmBtn) {
-              confirmBtn.style.display = 'none'; // скрываем только кнопку
+              confirmBtn.style.display = 'none';
             }
 
             // Также скрываем кнопки второго выбора, если они ещё видны
@@ -420,6 +450,9 @@
             }
           });
         }
+
+        // Сразу показываем первую строку интро
+        showNextNarrativeLine();
       });
     </script>
   </body>
