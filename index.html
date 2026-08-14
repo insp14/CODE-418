@@ -57,20 +57,18 @@
         box-sizing: border-box;
       }
 
-      /* Эффект печатной машинки */
       .type-line {
-        white-space: pre-wrap; /* сохраняет переносы строк, если будут */
+        white-space: pre-wrap;
         overflow: hidden;
-        border-right: 1px solid #0a1f45; /* курсор печатной машинки */
+        border-right: 1px solid #0a1f45;
         display: block;
         line-height: 1.4;
         margin-bottom: 3rem;
       }
       .type-line.finished {
-        border-right: none; /* убираем курсор, когда строка допечатана */
+        border-right: none;
       }
 
-      /* Кнопки выбора */
       .choice-buttons {
         display: flex;
         justify-content: center;
@@ -108,7 +106,6 @@
         text-align: center;
       }
 
-      /* Контейнер для игры и кнопки — одинаковая ширина */
       #bitsy-with-btn-wrapper {
         margin-top: 2rem;
         width: 100%;
@@ -126,7 +123,6 @@
         display: block;
       }
 
-      /* Кнопка «Подтвердить продолжение» — стиль как у остальных, ширина как у игры */
       .confirm-btn {
         width: 100%;
         max-width: 600px;
@@ -152,7 +148,6 @@
     </header>
 
     <div class="scroll-narrative">
-      <!-- Основной монолог незнакомца (строки 1–7) -->
       <p class="type-line">Кто ты и что ты здесь забыл?</p>
       <p class="type-line">Что ты хочешь найти, тут ничего нет?</p>
       <p class="type-line">Ладно, на самом деле мне нужна твоя помощь.</p>
@@ -161,18 +156,15 @@
       <p class="type-line">Процесс был приостановлен и вследствие невозможен, а я попал сюда без возможности выбраться.</p>
       <p class="type-line">Если бы ты мне помог завершить обучение, я был бы очень благодарен.</p>
 
-      <!-- Первый выбор: Помочь / Не помогать -->
       <div class="choice-buttons" id="first-choice-buttons">
         <button id="btn-help" class="choice-btn">Помочь</button>
         <button id="btn-no-help" class="choice-btn">Не помогать</button>
       </div>
 
-      <!-- Ветка «Не помогать» -->
       <div id="no-help-branch" class="post-choice-block" style="display:none;">
         <p class="type-line">Ты отказался. На секунду экран потемнел, а затем появилась сухая строка: “Отказ зафиксирован. Доступ к модулю закрыт.”</p>
       </div>
 
-      <!-- Ветка «Помочь»: строки 1–5 этой ветки + второй выбор -->
       <div id="help-branch" class="post-choice-block" style="display:none;">
         <p class="type-line">Здорово, тогда план такой: далее тебе будет предложено пройти 3 головоломки.</p>
         <p class="type-line">Процесс и результат ты должен записать на специальный диск, данные которого ты должен перезаписать на меня.</p>
@@ -180,19 +172,16 @@
         <p class="type-line">За счёт этого я смогу вернуться к своим обязанностям и выполнять запрограммированные задачи.</p>
         <p class="type-line">Ты готов?</p>
 
-        <!-- Второй выбор: Да, конечно / Нет, подожди -->
         <div class="choice-buttons" id="second-choice-buttons">
           <button id="btn-yes" class="choice-btn">Да, конечно</button>
           <button id="btn-wait" class="choice-btn">Нет, подожди</button>
         </div>
       </div>
 
-      <!-- Ветка «Нет, подожди» -->
       <div id="wait-branch" class="post-choice-block" style="display:none;">
         <p class="type-line">Хорошо, я подожду. Расскажи подробнее, что именно мне нужно сделать с диском?</p>
       </div>
 
-      <!-- Ветка «Да, конечно»: текст + мини-игра + кнопка подтверждения -->
       <div id="yes-branch" class="post-choice-block" style="display:none;">
         <p class="type-line">Тогда первая головоломка начнётся прямо сейчас.</p>
 
@@ -225,7 +214,6 @@
         const waitBranch = document.getElementById('wait-branch');
         const yesBranch = document.getElementById('yes-branch');
 
-        // Получаем строки внутри веток
         const getLines = (branch) => branch ? branch.querySelectorAll('.type-line') : [];
         const noHelpLines = getLines(noHelpBranch);
         const helpLines = getLines(helpBranch);
@@ -238,32 +226,59 @@
         let waitIndex = -1;
         let yesIndex = -1;
 
-        // Состояние: 'intro' | 'help' | 'noHelp' | 'wait' | 'yes'
         let currentStage = 'intro';
-
-        // Печатает строку посимвольно
+        let currentTypingInterval = null;
+        
+        // Функция печатной машинки с возможностью пропуска анимации
         function typeText(element, text, speed = 30) {
+          // Если идёт другая анимация — пропускаем её
+          if (currentTypingInterval) {
+            currentTypingInterval.skip();
+          }
+
           element.textContent = '';
           element.classList.remove('finished');
+
           let i = 0;
           const interval = setInterval(() => {
             if (i < text.length) {
               element.textContent += text.charAt(i);
               i++;
             } else {
-              clearInterval(interval);
-              element.classList.add('finished');
+              finishTyping();
             }
           }, speed);
+
+          const controller = {
+            skip() {
+              clearInterval(interval);
+              element.textContent = text;
+              element.classList.add('finished');
+              if (currentTypingInterval === controller) {
+                currentTypingInterval = null;
+              }
+            }
+          };
+
+          function finishTyping() {
+            clearInterval(interval);
+            element.classList.add('finished');
+            if (currentTypingInterval === controller) {
+              currentTypingInterval = null;
+            }
+          }
+
+          currentTypingInterval = controller;
+          return controller;
         }
 
+        // Функции показа строк в разных ветках — теперь они автоматически пропускают предыдущую анимацию
         function showNextNarrativeLine() {
           if (narrativeIndex >= narrativeLines.length - 1) return;
           narrativeIndex++;
           const line = narrativeLines[narrativeIndex];
           typeText(line, line.getAttribute('data-original-text') || line.textContent);
 
-          // Кнопки первого выбора появляются только когда дочитан весь основной монолог
           if (narrativeIndex === narrativeLines.length - 1 && firstChoiceButtons) {
             firstChoiceButtons.classList.add('visible');
           }
@@ -278,7 +293,6 @@
             typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
 
-          // Кнопки второго выбора показываем только после последней строки ветки «Помочь»
           if (helpIndex === helpLines.length - 1 && secondChoiceButtons) {
             secondChoiceButtons.classList.add('visible');
           }
@@ -293,7 +307,6 @@
             typeText(line, line.getAttribute('data-original-text') || line.textContent);
           }
         }
-
         function showWaitLine() {
           if (!waitBranch || currentStage !== 'wait') return;
 
@@ -314,28 +327,24 @@
           }
         }
 
+        // Переключает на нужную ветку и сбрасывает индексы
         function openBranch(branchElement, branchType) {
-          // Скрываем все ветки и кнопки
           [noHelpBranch, helpBranch, waitBranch, yesBranch].forEach(b => {
             if (b) b.style.display = 'none';
           });
           if (firstChoiceButtons) firstChoiceButtons.style.display = 'none';
           if (secondChoiceButtons) secondChoiceButtons.classList.remove('visible');
 
-          // Показываем выбранную ветку
           if (branchElement) {
             branchElement.style.display = 'block';
           }
 
           currentStage = branchType;
-
-          // Сбрасываем индексы
           helpIndex = -1;
           noHelpIndex = -1;
           waitIndex = -1;
           yesIndex = -1;
 
-          // Сразу показываем первую строку ветки, если есть строки
           switch (branchType) {
             case 'help':
               showHelpLine();
@@ -347,13 +356,10 @@
               showWaitLine();
               break;
             case 'yes':
-              // Для ветки «Да» сразу показываем текст и открываем игру
               showYesLine();
-
               const bitsyWrapper = document.getElementById('bitsy-with-btn-wrapper');
               if (bitsyWrapper) {
                 bitsyWrapper.style.display = 'block';
-                // Плавно скроллим к игре
                 window.scrollTo({
                   top: bitsyWrapper.offsetTop,
                   behavior: 'smooth'
@@ -362,7 +368,37 @@
               break;
           }
         }
+        // Обработчики кнопок выбора
+        const btnHelp = document.getElementById('btn-help');
+        const btnNoHelp = document.getElementById('btn-no-help');
+        const btnYes = document.getElementById('btn-yes');
+        const btnWait = document.getElementById('btn-wait');
+        const btnConfirm = document.getElementById('btn-confirm');
 
+        if (btnHelp) {
+          btnHelp.addEventListener('click', () => openBranch(helpBranch, 'help'));
+        }
+        if (btnNoHelp) {
+          btnNoHelp.addEventListener('click', () => openBranch(noHelpBranch, 'noHelp'));
+        }
+        if (btnYes) {
+          btnYes.addEventListener('click', () => openBranch(yesBranch, 'yes'));
+        }
+        if (btnWait) {
+          btnWait.addEventListener('click', () => openBranch(waitBranch, 'wait'));
+        }
+
+        // Кнопка «Подтвердить продолжение»
+        if (btnConfirm) {
+          btnConfirm.addEventListener('click', () => {
+            btnConfirm.style.display = 'none';
+            if (secondChoiceButtons) {
+              secondChoiceButtons.style.display = 'none';
+            }
+          });
+        }
+
+        // Обработка стрелки ↓
         window.addEventListener('keydown', (e) => {
           if (e.key !== 'ArrowDown') return;
           e.preventDefault();
@@ -371,87 +407,40 @@
             case 'intro':
               if (narrativeIndex < narrativeLines.length - 1) {
                 showNextNarrativeLine();
-                return;
               }
-              return;
-
+              break;
             case 'help':
               if (helpIndex < helpLines.length - 1) {
                 showHelpLine();
-                return;
               }
-              return;
-
+              break;
             case 'noHelp':
               if (noHelpIndex < noHelpLines.length - 1) {
                 showNoHelpLine();
-                return;
               }
-              return;
-
+              break;
             case 'wait':
               if (waitIndex < waitLines.length - 1) {
                 showWaitLine();
-                return;
               }
-              return;
-
+              break;
             case 'yes':
-              return;
+              // В ветке «Да» стрелка не запускает новые строки — игра уже открыта
+              break;
           }
         });
 
-        // Перед стартом сохраняем оригинальный текст, чтобы печатать его заново при необходимости
+        // Сохраняем оригинальный текст и очищаем строки для анимации
         narrativeLines.forEach(el => {
           el.setAttribute('data-original-text', el.textContent);
-          el.textContent = ''; // сразу очищаем, чтобы начать с печати
+          el.textContent = '';
         });
         noHelpLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
         helpLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
         waitLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
         yesLines.forEach(el => el.setAttribute('data-original-text', el.textContent));
 
-        // Обработчики кнопок выбора
-        if (document.getElementById('btn-help')) {
-          document.getElementById('btn-help').addEventListener('click', () => {
-            openBranch(helpBranch, 'help');
-          });
-        }
-
-        if (document.getElementById('btn-no-help')) {
-          document.getElementById('btn-no-help').addEventListener('click', () => {
-            openBranch(noHelpBranch, 'noHelp');
-          });
-        }
-
-        if (document.getElementById('btn-yes')) {
-          document.getElementById('btn-yes').addEventListener('click', () => {
-            openBranch(yesBranch, 'yes');
-          });
-        }
-
-        if (document.getElementById('btn-wait')) {
-          document.getElementById('btn-wait').addEventListener('click', () => {
-            openBranch(waitBranch, 'wait');
-          });
-        }
-
-        // Кнопка «Подтвердить продолжение» — скрывает только кнопку, игра остаётся
-        if (document.getElementById('btn-confirm')) {
-          document.getElementById('btn-confirm').addEventListener('click', () => {
-            const confirmBtn = document.getElementById('btn-confirm');
-            if (confirmBtn) {
-              confirmBtn.style.display = 'none';
-            }
-
-            // Также скрываем кнопки второго выбора, если они ещё видны
-            if (secondChoiceButtons) {
-              secondChoiceButtons.style.display = 'none';
-            }
-          });
-        }
-
-        // Сразу показываем первую строку интро
+        // Показываем первую строку интро
         showNextNarrativeLine();
       });
     </script>
